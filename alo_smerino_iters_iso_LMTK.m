@@ -2,7 +2,7 @@ clear; clc;
 
 %% === Load data ===
 load('data/bscdataLMTKCP.mat'); % contains struct bscdataLMTKCP.(cpName).(scanName)
-load('data/bsc_params_LMTKCP.mat','params_all'); % your existing parameter maps
+load('data/sfm2_bsc_params_LMTKCP.mat','params_all'); % your existing parameter maps
 addpath('utils/');
 savefolder = 'alo_smerino_iters_iso/';
 mkdir(savefolder)
@@ -93,7 +93,7 @@ for lambda_i_exp=[5 4 3 -4]
     end
 
     % Save *outside* parfor, also safe
-    save([savefolder,'bsc_params_LMTKCP_GNTV_lambda_',num2str(lambda_i),'.mat'], ...
+    save([savefolder,'sfm2_bsc_params_LMTKCP_GNTV_lambda_',num2str(lambda_i),'.mat'], ...
          'params_all_reg','-v7.3');
-    fprintf('\nSaved: bsc_params_LMTKCP_GNTV_lambda_%g.mat\n', lambda_i);
+    fprintf('\nSaved: sfm2_bsc_params_LMTKCP_GNTV_lambda_%g.mat\n', lambda_i);
 end

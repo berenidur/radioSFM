@@ -1,6 +1,6 @@
 close all; clear; clc;
 load('P_tv_results')
-load('bsc_params_JCCP_GNTV.mat','params_all_reg');
+load('sfm2_bsc_params_JCCP_GNTV.mat','params_all_reg');
 
 cpFields = fieldnames(params_all_reg);
 M = [];

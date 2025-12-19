@@ -3,7 +3,7 @@ clear; clc;
 %% === Load data ===
 load('bscdataJCCP.mat'); % contains struct bscdataJCCP.(cpName).(scanName)
 load('bsc_f.mat');       % vector f (frequencies)
-load('bsc_params_JCCP.mat','params_all'); % your existing parameter maps
+load('sfm2_bsc_params_JCCP.mat','params_all'); % your existing parameter maps
 addpath('utils/')
 
 cpNames = fieldnames(bscdataJCCP);
@@ -62,9 +62,9 @@ for c = 1:numel(cpNames)
         %% Save
         params_block_reg(:,:, [1,4]) = params_block_reg(:,:, [1,4]) / 1e5;
         params_all_reg.(cpName).(scanName) = params_block_reg;
-        save('bsc_params_JCCP_GNTV.mat','params_all_reg','-v7.3');
+        save('sfm2_bsc_params_JCCP_GNTV.mat','params_all_reg','-v7.3');
     end
 end
 
-save('bsc_params_JCCP_GNTV.mat','params_all_reg','-v7.3');
-fprintf('\nSaved: bsc_params_JCCP_GNTV.mat\n');
+save('sfm2_bsc_params_JCCP_GNTV.mat','params_all_reg','-v7.3');
+fprintf('\nSaved: sfm2_bsc_params_JCCP_GNTV.mat\n');
