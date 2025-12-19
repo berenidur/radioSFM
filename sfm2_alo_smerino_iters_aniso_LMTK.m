@@ -66,7 +66,8 @@ for lambda_i_exp=[2 1 0 -1 -4]
             cfg.scanName  = scanName;
 
             %% === Run GNTV regularization ===
-            cfg.tvform = 'aniso';
+            cfg.tvform  = 'aniso';
+            cfg.sfm     = 2;
             params_block_reg = gntv_lsqnonlin(params_block, bscblock, f, cfg);
 
             %% === Reinstate NaNs outside valid region ===

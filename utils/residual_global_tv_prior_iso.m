@@ -1,6 +1,6 @@
 function r = residual_global_tv_prior_iso(x, params_init, channels, ...
                                       bscblock, f, mask_valid, ...
-                                      idx_valid, lambda)
+                                      idx_valid, lambda, sfm)
 % Build the full residual:
 %   r = [ r_data ; r_tv ]
 %
@@ -49,7 +49,15 @@ function r = residual_global_tv_prior_iso(x, params_init, channels, ...
         end
 
         x_full = squeeze(params_cur(i,j,:))';   % 1xP
-        bsc_model = gntv_sfm2_F_compute_bsc_from_x(x_full, kk);
+
+        switch sfm
+            case 1
+                bsc_model = gntv_sfm1_F_compute_bsc_from_x(x_full, kk);
+            case 2
+                bsc_model = gntv_sfm2_F_compute_bsc_from_x(x_full, kk);
+            otherwise
+                error('Unknown sfm value: %s (expected 1 or 2)' , sfm);
+        end
 
         data_vec(isnan(data_vec)) = 0;
         r_data((k-1)*F+(1:F)) = data_vec(:) - bsc_model(:);
