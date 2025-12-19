@@ -1,7 +1,6 @@
 clear; clc;
 
-load('bscdataJCCP.mat'); % loads bscdataJCCP
-load('bsc_f.mat'); %loads f (128×1)
+load('bscdataJCCP.mat'); % loads bscdataJCCP and f
 f=f*1e6;
 cpNames = fieldnames(bscdataJCCP);
 params_all = struct();
@@ -50,4 +49,4 @@ for c = 1:numel(cpNames)
     end
 end
 
-save('bsc_params_JCCP.mat','params_all');
+save('sfm2_bsc_params_JCCP.mat','params_all');
