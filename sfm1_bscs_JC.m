@@ -31,7 +31,7 @@ for c = 1:numel(cpNames)
         nValid = numel(rows);
         % fprintf('      Nonzero pixels: %d\n', nValid);
 
-        params_block = nan(size(bscblock,1),size(bscblock,2),11);
+        params_block = nan(size(bscblock,1),size(bscblock,2),7);
 
         for k = 1:nValid
             x = rows(k);
