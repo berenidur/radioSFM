@@ -1,13 +1,13 @@
 clear; clc;
 
 %% === Load data ===
-load('data/bscdataJCCP.mat'); % contains struct bscdataJCCP.(cpName).(scanName) + freqs
-load('data/sfm1_bsc_params_JCCP.mat','params_all'); % existing parameter maps
+load('data/bscdataLMTKCP.mat'); % contains struct bscdataLMTKCP.(cpName).(scanName) + freqs
+load('data/sfm1_bsc_params_LMTKCP.mat','params_all'); % existing parameter maps
 addpath('utils/');
-savefolder = 'alo_smerino_iters_iso/';
+savefolder = 'alo_smerino_iters_aniso/';
 mkdir(savefolder)
 
-cpNames = fieldnames(bscdataJCCP);
+cpNames = fieldnames(bscdataLMTKCP);
 params_all_reg = struct();
 
 mkdir(savefolder);
@@ -20,7 +20,7 @@ for lambda_i_exp=-4:5
     % for c = 1:numel(cpNames)
     for c = 1
         cpName    = cpNames{c};
-        scanNames = fieldnames(bscdataJCCP.(cpName));
+        scanNames = fieldnames(bscdataLMTKCP.(cpName));
         nScans    = numel(scanNames);
 
         % temporary storage for parfor results
@@ -30,7 +30,7 @@ for lambda_i_exp=-4:5
             scanName = scanNames{s};
             fprintf('\n=== Regularizing %s / %s ===\n', cpName, scanName);
 
-            bscblock = bscdataJCCP.(cpName).(scanName);
+            bscblock = bscdataLMTKCP.(cpName).(scanName);
             if isempty(bscblock)
                 % leave params_block_reg_all{s} empty
                 continue;
@@ -66,7 +66,7 @@ for lambda_i_exp=-4:5
             cfg.scanName  = scanName;
 
             %% === Run GNTV regularization ===
-            cfg.tvform  = 'iso';
+            cfg.tvform  = 'aniso';
             cfg.sfm     = 1;
             params_block_reg = gntv_lsqnonlin(params_block, bscblock, f, cfg);
 
@@ -94,7 +94,7 @@ for lambda_i_exp=-4:5
     end
 
     % Save *outside* parfor, also safe
-    save([savefolder,'sfm1_bsc_params_JCCP_GNTV_lambda_',num2str(lambda_i),'.mat'], ...
+    save([savefolder,'sfm1_bsc_params_LMTKCP_GNTV_lambda_',num2str(lambda_i),'.mat'], ...
          'params_all_reg','-v7.3');
-    fprintf('\nSaved: sfm1_bsc_params_JCCP_GNTV_lambda_%g.mat\n', lambda_i);
+    fprintf('\nSaved: sfm1_bsc_params_LMTKCP_GNTV_lambda_%g.mat\n', lambda_i);
 end

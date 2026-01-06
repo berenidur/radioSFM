@@ -26,7 +26,7 @@ for lambda_i_exp=-4:5
         % temporary storage for parfor results
         params_block_reg_all = cell(nScans,1);
 
-        for s = 1:nScans
+        parfor s = 1:nScans
             scanName = scanNames{s};
             fprintf('\n=== Regularizing %s / %s ===\n', cpName, scanName);
 
@@ -37,7 +37,7 @@ for lambda_i_exp=-4:5
             end
 
             params_block = params_all.(cpName).(scanName);
-            params_block = params_block(:,:,1:7);
+            params_block = params_block(:,:,1:3);
 
             params_block(:,:,1) = 1e5 * params_block(:,:,1);
 
