@@ -1,6 +1,6 @@
 clear; clc;
 
-load('bscdataJCCP.mat'); % loads bscdataJCCP and f
+load('data/bscdataJCCP.mat'); % loads bscdataJCCP and f
 f=f*1e6;
 cpNames = fieldnames(bscdataJCCP);
 params_all = struct();
