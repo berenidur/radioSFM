@@ -1,18 +1,26 @@
 close all;clear; clc;
-load('P_tv_results','P_all_bef')
-% load('bsc_params_JCCP_GNTV.mat','params_all_reg');
+% cp='JC';    hist = [5.49, 0.13, 8.73, 0.52]; % a_n, phi_n, a_c, phi_c (a in um)
+cp='4T1';   hist = [5.35, 0.14, 8.12, 0.49];
+% cp='LMTK';  hist = [4.66, 0.15, 7.25, 0.58];
 
-fnames={'alo_smerino_iters/';
-    'alo_smerino_iters_aniso/';
-    'alo_smerino_iters_iso/';
-'alo_smerino_iters_soloan/';
-'alo_smerino_iters_fminsearch/';
-'alo_smerino_iters_fminsearch_soloan/'};
+% sfm = 1;
+sfm = 2;
 
-fi=1;
+load(['data/sfm',num2str(sfm),'_bsc_params_',cp,'CP.mat'],'params_all')
 
-lstfiles = ls([fnames{fi},'*.mat']);
-lstfiles = lstfiles(1:6,:);
+fnames={'alo_smerino_iters/';               % 1
+    'alo_smerino_iters_aniso/';             % 2
+    'alo_smerino_iters_iso/';               % 3
+'alo_smerino_iters_soloan/';                % 4
+'alo_smerino_iters_fminsearch/';            % 5
+'alo_smerino_iters_fminsearch_soloan/'};    % 6
+
+fi=3;
+% sfm2 iso sale bien
+
+lstfiles = ls([fnames{fi},['sfm',num2str(sfm),'*',cp,'*.mat']]);
+disp(lstfiles)
+% keyboard;
 
 ncol=3;
 nrow=ceil((size(lstfiles,1)+1)/ncol);
@@ -21,8 +29,8 @@ allMsize = [];
 allMsize_lastscan = [];
 
 for i=1:size(lstfiles,1)
-    lblfile = strtrim(lstfiles(i,:));
-    lambda = lblfile(29:end-4);
+    lblfile = strtrim(lstfiles(i,:)); %disp(lblfile);    
+    lambda = extractBetween(lblfile, 'lambda_', '.mat');
     load([fnames{fi},lblfile],'params_all_reg');
     cpFields = fieldnames(params_all_reg);
     M = [];
@@ -33,7 +41,7 @@ for i=1:size(lstfiles,1)
             data = params_all_reg.(cpFields{c}).(scanFields{s});  % e.g., [52×4×7]
             
             % Reshape each scan to [N × 7]
-            reshaped = reshape(data, [], 7);  % flatten first two dims
+            reshaped = reshape(data, [], -1+sfm*4);  % flatten first two dims
             
             % Concatenate along the first dimension
             M = [M; reshaped];
@@ -48,19 +56,25 @@ for i=1:size(lstfiles,1)
     
     figure(1);
     subplot(nrow,ncol,i+1);
-    plot(M(:,1)*1e6,M(:,2),'+b','DisplayName','N');hold on;
-    plot(M(:,4)*1e6,M(:,5),'+r','DisplayName','C');
+    if sfm==2
+        plot(M(:,1)*1e6,M(:,2),'+b','DisplayName','N');hold on;
+        plot(M(:,4)*1e6,M(:,5),'+r','DisplayName','C');
+    elseif sfm==1
+        plot(M(:,1)*1e6,M(:,2),'+b','DisplayName','N,C');hold on;
+    end
     xlim([0 12]);ylim([0 1]);
     xlabel('Scatterer radius (um)');ylabel('Scatterer volume fraction');
     title(['\lambda=',lambda]);
-    xline(5.5,'k--','HandleVisibility','off','LineWidth',2);
-    xline(9,'k--','HandleVisibility','off','LineWidth',2);
-    yline(0.52,'k--','HandleVisibility','off','LineWidth',2);
-    yline(0.1,'k--','HandleVisibility','off','LineWidth',2);
+    xline(hist(1),'k--','HandleVisibility','off','LineWidth',2);
+    xline(hist(3),'k--','HandleVisibility','off','LineWidth',2);
+    yline(hist(2),'k--','HandleVisibility','off','LineWidth',2);
+    yline(hist(4),'k--','HandleVisibility','off','LineWidth',2);
     plot(mean(M(:,1)*1e6),mean(M(:,2)),...
         Marker=".",MarkerSize=20,HandleVisibility="off",Color='k');
-    plot(mean(M(:,4)*1e6),mean(M(:,5)),...
-        Marker=".",MarkerSize=20,HandleVisibility="off",Color='k');
+    if sfm==2
+        plot(mean(M(:,4)*1e6),mean(M(:,5)),...
+            Marker=".",MarkerSize=20,HandleVisibility="off",Color='k');
+    end
     legend; axis square;theme light;
 
     figure(2);
@@ -74,28 +88,40 @@ end
 lastM = min(allMsize);
 lastM_lastscan = min(allMsize_lastscan);
 
+
+fields = fieldnames(params_all.CP1);
+C = cell(numel(fields),1);
+
+for k = 1:numel(fields)
+    A = params_all.CP1.(fields{k});
+    X = reshape(A, [], size(A,3));
+    C{k} = X(~isnan(X(:,1)), :);
+end
+
+before_reg = vertcat(C{:});
+
 figure(1);
-sgtitle('lsqnonlin')
+sgtitle([cp,' - lsqnonlin'])
 % sgtitle('fminsearch')
 subplot(nrow,ncol,1);
-plot(P_all_bef(1:lastM,1)*1e6,P_all_bef(1:lastM,2),'+b','DisplayName','N');hold on;
-plot(P_all_bef(1:lastM,4)*1e6,P_all_bef(1:lastM,5),'+r','DisplayName','C');
+plot(before_reg(1:lastM,1)*1e6,before_reg(1:lastM,2),'+b','DisplayName','N');hold on;
+plot(before_reg(1:lastM,4)*1e6,before_reg(1:lastM,5),'+r','DisplayName','C');
 xlim([0 12]);ylim([0 1]);
 xlabel('Scatterer radius (um)');ylabel('Scatterer volume fraction');
 title('before TV');
-xline(5.49,'k--','HandleVisibility','off','LineWidth',2);
-xline(8.73,'k--','HandleVisibility','off','LineWidth',2);
-yline(0.13,'k--','HandleVisibility','off','LineWidth',2);
-yline(0.52,'k--','HandleVisibility','off','LineWidth',2);
-plot(mean(P_all_bef(1:lastM,1)*1e6),mean(P_all_bef(1:lastM,2)),...
+xline(hist(1),'k--','HandleVisibility','off','LineWidth',2);
+xline(hist(3),'k--','HandleVisibility','off','LineWidth',2);
+yline(hist(2),'k--','HandleVisibility','off','LineWidth',2);
+yline(hist(4),'k--','HandleVisibility','off','LineWidth',2);
+plot(mean(before_reg(1:lastM,1)*1e6),mean(before_reg(1:lastM,2)),...
     Marker=".",MarkerSize=20,HandleVisibility="off",Color='k');
-plot(mean(P_all_bef(1:lastM,4)*1e6),mean(P_all_bef(1:lastM,5)),...
+plot(mean(before_reg(1:lastM,4)*1e6),mean(before_reg(1:lastM,5)),...
     Marker=".",MarkerSize=20,HandleVisibility="off",Color='k');
 legend; axis square; theme light;
 
 map0 = nan(size(data(:,:,1)));
 map0_ind = find(~isnan(data(:,:,1)));
-map0(map0_ind) = P_all_bef(1:lastM_lastscan,1);
+map0(map0_ind) = before_reg(1:lastM_lastscan,1);
 
 figure(2);
 sgtitle('lsqnonlin')
