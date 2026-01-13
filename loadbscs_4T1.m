@@ -1,30 +1,38 @@
 close all; clear; clc;
 
-jcfolder='4T1_CP/';
+jcfolder='preprocessing/4T1_CP/';
 scans=1:11;
-bscfolders={
-    'A046_40_54dB_';
-    };
+bscfolders=46:62;
 
 bscdata4T1CP=struct();
 
 for j=1:length(bscfolders)
     disp(['CP ',num2str(j)]);
-% for j=1
+
 for i=scans
     disp(['   scan ',num2str(i)])
 
-    filebsc=[jcfolder,bscfolders{j},'bscFULL-',num2str(i),'.mat'];
-    fileroi=[jcfolder,bscfolders{j},'ROI_',num2str(i),'.mat'];
-    load(fileroi);
-    load(filebsc);
+    % Build folder path
+        folderPath = fullfile(jcfolder, ['A', sprintf('%03d', bscfolders(j))]);
 
-    % % load('inversion_mean_CP1_fminconC1_fminsearch')
-    % load('inversion_mean_CP1_fminconC1')
-    % % load('inversion_mean_CP1_fminconC7') % up to C7
+    % Find files using dir
+    bscFile = dir(fullfile(folderPath, ['*bscFULL-', num2str(i), '.mat']));
+    roiFile = dir(fullfile(folderPath, ['*ROI_', num2str(i), '.mat']));
 
-    % Params_SFMi=eval(['Params_SFM',num2str(i)]);
-    % UIB=Params_SFMi;
+    % Safety check
+    if isempty(bscFile) || isempty(roiFile)
+        warning('Missing files for CP %d scan %d', bscfolders(j), i);
+        continue
+    end
+
+    % Load files
+    load(fullfile(folderPath, bscFile(1).name));
+    load(fullfile(folderPath, roiFile(1).name));
+
+    % disp(bscFile(1).name)
+    % disp(roiFile(1).name)
+    % 
+    % continue
 
     pos_l=ROI_positions.left;
     pos_r=ROI_positions.right;
@@ -57,7 +65,7 @@ for i=scans
         % UIB_grille(zr & [true; ~zr(1:end-1)] & [~zr(2:end); true],:,:) = [];
         UIB_grille_bsc(zr & [true; ~zr(1:end-1)] & [~zr(2:end); true],:,:) = [];
 
-        bscdata4T1CP.(['CP',num2str(j)]).(['scan',num2str(i)])=UIB_grille_bsc;
+        bscdata4T1CP.(['CP',num2str(bscfolders(j))]).(['scan',num2str(i)])=UIB_grille_bsc;
     
     
         % figure(j); subplot(4,3,i);
