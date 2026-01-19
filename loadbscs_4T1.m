@@ -7,7 +7,7 @@ bscfolders=46:62;
 bscdata4T1CP=struct();
 
 for j=1:length(bscfolders)
-    disp(['CP ',num2str(j)]);
+    disp(['CP ',num2str(bscfolders(j))]);
 
 for i=scans
     disp(['   scan ',num2str(i)])
@@ -80,4 +80,4 @@ for i=scans
 end
 end
 
-save('bscdata4T1CP','bscdata4T1CP');
+save('data/bscdata4T1CP','bscdata4T1CP','-v7.3');

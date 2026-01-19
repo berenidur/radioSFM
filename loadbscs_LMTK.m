@@ -7,7 +7,7 @@ bscfolders=130:144;
 bscdataLMTKCP=struct();
 
 for j=1:length(bscfolders)
-    disp(['CP ',num2str(j)]);
+    disp(['CP ',num2str(bscfolders(j))]);
 
 for i=scans
     disp(['   scan ',num2str(i)])
@@ -80,4 +80,4 @@ for i=scans
 end
 end
 
-save('bscdataLMTKCP','bscdataLMTKCP');
+save('data/bscdataLMTKCP','bscdataLMTKCP','-v7.3');
