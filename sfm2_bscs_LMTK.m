@@ -50,4 +50,5 @@ for c = 1:numel(cpNames)
     end
 end
 
-save('data/sfm2_bsc_params_LMTKCP.mat','params_all');
+% save('data/sfm2_bsc_params_LMTKCP.mat','params_all');
+save('sfm2_bsc_params_LMTKCP.mat','params_all');
