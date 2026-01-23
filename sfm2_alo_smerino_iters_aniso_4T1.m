@@ -13,7 +13,7 @@ params_all_reg = struct();
 mkdir(savefolder);
 
 %% Iteration
-for lambda_i_exp=[2 1 0 -1 -4]
+for lambda_i_exp=3:5
     lambda_i=10^lambda_i_exp;
     if lambda_i_exp==-4, lambda_i=0; end
 
