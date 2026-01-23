@@ -1,6 +1,6 @@
 function sfm2_alo_smerino_iters_iso_LMTK_new(c_i)
 %% === Load data ===
-load('data/bscdataLMTKCP.mat','bscdataLMTKCP'); % contains struct bscdataLMTKCP.(cpName).(scanName)
+load('data/bscdataLMTKCP.mat','bscdataLMTKCP','f'); % contains struct bscdataLMTKCP.(cpName).(scanName)
 load('data/sfm2_bsc_params_LMTKCP.mat','params_all'); % your existing parameter maps
 addpath('utils/');
 savefolder = 'alo_smerino_iters_iso/';

@@ -1,6 +1,6 @@
 function sfm2_alo_smerino_iters_iso_4T1_new(c_i)
 %% === Load data ===
-load('data/bscdata4T1CP.mat','bscdata4T1CP'); % contains struct bscdata4T1CP.(cpName).(scanName)
+load('data/bscdata4T1CP.mat','bscdata4T1CP','f'); % contains struct bscdata4T1CP.(cpName).(scanName)
 load('data/sfm2_bsc_params_4T1CP.mat','params_all'); % your existing parameter maps
 addpath('utils/');
 savefolder = 'alo_smerino_iters_iso/';
