@@ -4,4 +4,4 @@
 #SBATCH --gres=gpu:1
 
 # Run the job
-srun matlab -nosplash -nodesktop -nodisplay -r "$1; exit"
+srun matlab -batch "$1"
