@@ -2,7 +2,6 @@ clear; clc;
 
 load('data/bscdataLMTKCP.mat'); % loads bscdataLMTKCP and freqs
 addpath('utils/');
-f=f*1e6;
 cpNames = fieldnames(bscdataLMTKCP);
 params_all = struct();
 
@@ -34,7 +33,10 @@ for c = 1:numel(cpNames)
 
         params_block = nan(size(bscblock,1),size(bscblock,2),11);
 
-        for k = 1:nValid
+        % Temporary parfor-friendly output
+        params_valid = nan(nValid, 11);
+
+        parfor k = 1:nValid
             x = rows(k);
             y = cols(k);
 
@@ -42,13 +44,17 @@ for c = 1:numel(cpNames)
 
             params = sfm2_inversion_BSC_SFM_Neldermead_sansLog_Fc(f, bsc_vector, 20);
             
-            params_block(x,y,:) = params;
+            % params_block(x,y,:) = params;
+            params_valid(k,:) = params;
 
+        end
+
+        for k = 1:nValid
+            params_block(rows(k), cols(k), :) = params_valid(k,:);
         end
 
         params_all.(cpName).(scanName) = params_block;
     end
 end
 
-% save('data/sfm2_bsc_params_LMTKCP.mat','params_all');
-save('sfm2_bsc_params_LMTKCP.mat','params_all');
+save('data/sfm2_bsc_params_LMTKCP.mat','params_all','f');

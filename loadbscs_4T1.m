@@ -1,6 +1,8 @@
 close all; clear; clc;
 
 jcfolder='preprocessing/4T1_CP/';
+f=load('preprocessing/4T1_CP/A046/bsc_ave.mat','f');
+f=f.f*1e6;
 scans=1:11;
 bscfolders=46:62;
 
@@ -43,7 +45,9 @@ for i=scans
         pos_meanx=pos_l+(pos_r-pos_l)/2;
         pos_meany=pos_t+(pos_b-pos_t)/2;
     
-        nb_posx=(max(pos_l)-min(pos_l))./min(abs(diff(pos_l)));
+        diffnozero=diff(pos_l);
+        diffnozero=diffnozero(diffnozero~=0);
+        nb_posx=(max(pos_l)-min(pos_l))./min(abs(diffnozero));
         nb_posxint=int16(nb_posx);
         nb_posyint=length(pos_meany([1; 1+find(diff(pos_meany))]));
         % UIB_grille=zeros(nb_posxint,nb_posyint,4);
@@ -52,7 +56,9 @@ for i=scans
     
         for ii=1:length(pos_meanx)
             if pos_l(ii)>0
-                indf=int16(pos_l(ii)./min(abs(diff(pos_l))));
+                diffnozero=diff(pos_l);
+                diffnozero=diffnozero(diffnozero~=0);
+                indf=int16(pos_l(ii)./min(abs(diffnozero)));
                 indc=round((pos_b(ii)-pos_b(1))./(max(diff(pos_b))+eps)+1);
                 % UIB_grille(indf,indc,:)=UIB(:,ii);
                 UIB_grille(indf,indc)=ii;
@@ -80,4 +86,4 @@ for i=scans
 end
 end
 
-save('data/bscdata4T1CP','bscdata4T1CP','-v7.3');
+save('data/bscdata4T1CP','bscdata4T1CP','f','-v7.3');

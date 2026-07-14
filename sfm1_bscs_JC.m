@@ -1,7 +1,6 @@
 clear; clc;
 
 load('data/bscdataJCCP.mat'); % loads bscdataJCCP and f
-f=f*1e6;
 cpNames = fieldnames(bscdataJCCP);
 params_all = struct();
 
@@ -33,7 +32,10 @@ for c = 1:numel(cpNames)
 
         params_block = nan(size(bscblock,1),size(bscblock,2),7);
 
-        for k = 1:nValid
+        % Temporary parfor-friendly output
+        params_valid = nan(nValid, 7);
+
+        parfor k = 1:nValid
             x = rows(k);
             y = cols(k);
 
@@ -41,12 +43,17 @@ for c = 1:numel(cpNames)
 
             params = sfm1_inversion_BSC_SFM_Neldermead_sansLog_Fc(f, bsc_vector, 20);
             
-            params_block(x,y,:) = params;
+            % params_block(x,y,:) = params;
+            params_valid(k,:) = params;
 
+        end
+
+        for k = 1:nValid
+            params_block(rows(k), cols(k), :) = params_valid(k,:);
         end
 
         params_all.(cpName).(scanName) = params_block;
     end
 end
 
-save('sfm1_bsc_params_JCCP.mat','params_all');
+save('sfm1_bsc_params_JCCP.mat','params_all','f');

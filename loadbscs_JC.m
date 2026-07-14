@@ -1,6 +1,8 @@
 close all; clear; clc;
 
-jcfolder='JC_CP_data/JC_CP_';
+jcfolder='preprocessing/JC_CP/JC_CP_';
+f=load('preprocessing/JC_CP/JC_CP_1/BSC/JC_CP1_2_40_40dB/bsc_ave.mat','f');
+f=f.f*1e6;
 cps=[1,2,3,4,5,6,10,11,12,13];
 bscfolders={
     'JC_CP1_2_40_40dB';
@@ -44,7 +46,9 @@ for i=1:11
         pos_meanx=pos_l+(pos_r-pos_l)/2;
         pos_meany=pos_t+(pos_b-pos_t)/2;
     
-        nb_posx=(max(pos_l)-min(pos_l))./min(abs(diff(pos_l)));
+        diffnozero=diff(pos_l);
+        diffnozero=diffnozero(diffnozero~=0);
+        nb_posx=(max(pos_l)-min(pos_l))./min(abs(diffnozero));
         nb_posxint=int16(nb_posx);
         nb_posyint=length(pos_meany([1; 1+find(diff(pos_meany))]));
         % UIB_grille=zeros(nb_posxint,nb_posyint,4);
@@ -53,7 +57,9 @@ for i=1:11
     
         for ii=1:length(pos_meanx)
             if pos_l(ii)>0
-                indf=int16(pos_l(ii)./min(abs(diff(pos_l))));
+                diffnozero=diff(pos_l);
+                diffnozero=diffnozero(diffnozero~=0);
+                indf=int16(pos_l(ii)./min(abs(diffnozero)));
                 indc=round((pos_b(ii)-pos_b(1))./(max(diff(pos_b))+eps)+1);
                 % UIB_grille(indf,indc,:)=UIB(:,ii);
                 UIB_grille(indf,indc)=ii;
@@ -81,4 +87,4 @@ for i=1:11
 end
 end
 
-save('bscdataJCCP','bscdataJCCP');
+save('data/bscdataJCCP','bscdataJCCP','f','-v7.3');
