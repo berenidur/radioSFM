@@ -5,8 +5,8 @@ addpath('utils/');
 % Comment out any complete row that you do not want to run.
 % Columns: case label, input MAT file, BSC variable, output MAT file
 cases = {
-    % 'JC',   'data/bscdataJCCP.mat',   'bscdataJCCP',   'data/sfm1_bsc_params_JCCP.mat';
-    % 'LMTK', 'data/bscdataLMTKCP.mat', 'bscdataLMTKCP', 'data/sfm1_bsc_params_LMTKCP.mat';
+    'JC',   'data/bscdataJCCP.mat',   'bscdataJCCP',   'data/sfm1_bsc_params_JCCP.mat';
+    'LMTK', 'data/bscdataLMTKCP.mat', 'bscdataLMTKCP', 'data/sfm1_bsc_params_LMTKCP.mat';
     '4T1',  'data/bscdata4T1CP.mat',  'bscdata4T1CP',  'data/sfm1_bsc_params_4T1CP.mat';
 };
 
