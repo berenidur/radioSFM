@@ -13,7 +13,7 @@ addpath('utils/');
 %   3 -> at least 3 of 4 pixels must be valid
 %   4 -> all 4 pixels must be valid
 %
-minValidPixelsPerBox = 2;
+minValidPixelsPerBox = 1;
 avgbox = '2x2';
 
 if ~ismember(minValidPixelsPerBox, 1:4)
@@ -24,11 +24,19 @@ end
 % Each uncommented row is processed.
 % Comment out any complete row that you do not want to run.
 % Columns: case label, input MAT file, BSC variable, output MAT file
-cases = {
-    'JC',   'data/bscdataJCCP.mat',   'bscdataJCCP',   'data2x2/sfm2_bsc_params_JCCP.mat';
-    'LMTK', 'data/bscdataLMTKCP.mat', 'bscdataLMTKCP', 'data2x2/sfm2_bsc_params_LMTKCP.mat';
-    '4T1',  'data/bscdata4T1CP.mat',  'bscdata4T1CP',  'data2x2/sfm2_bsc_params_4T1CP.mat';
-};
+names = {
+    'JC',...
+    'LMTK',...
+    '4T1',...
+    };
+cp = strcat(names,'CP');
+
+cases = [ ...
+    names(:), ...
+    strcat('data/bscdata', cp(:), '.mat'), ...
+    strcat('bscdata', cp(:)), ...
+    strcat(['data',avgbox,'/minValidPixelsPerBox',num2str(minValidPixelsPerBox),'/sfm2_bsc_params_'], cp(:), '.mat') ...
+];
 
 totalTimer = tic;
 
@@ -245,8 +253,9 @@ for caseIdx = 1:size(cases, 1)
         end
     end
 
-
+    mkdir(fileparts(outputFile));
     save(outputFile, 'params_all', 'f', 'minValidPixelsPerBox', 'avgbox', '-v7.3');
+    disp('  Saved output file as: ' + outputFile);
 
     fprintf('\nCompleted %s in %.1f min\n', ...
         caseName, toc(caseTimer) / 60);
