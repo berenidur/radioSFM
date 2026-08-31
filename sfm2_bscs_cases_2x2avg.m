@@ -15,6 +15,7 @@ parpool;
 %   4 -> all 4 pixels must be valid
 %
 minValidPixelsPerBox = 2;
+avgbox = '2x2';
 
 if ~ismember(minValidPixelsPerBox, 1:4)
     error('minValidPixelsPerBox must be an integer between 1 and 4.');
@@ -246,7 +247,7 @@ for caseIdx = 1:size(cases, 1)
     end
 
 
-    save(outputFile, 'params_all', 'f', '-v7.3');
+    save(outputFile, 'params_all', 'f', 'minValidPixelsPerBox', 'avgbox', '-v7.3');
 
     fprintf('\nCompleted %s in %.1f min\n', ...
         caseName, toc(caseTimer) / 60);
