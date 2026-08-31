@@ -1,6 +1,5 @@
 close all; clear; clc;
 addpath('utils/');
-parpool;
 
 % ============================================================
 % 2x2 averaging parameter
