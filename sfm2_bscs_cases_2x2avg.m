@@ -1,0 +1,257 @@
+close all; clear; clc;
+addpath('utils/');
+parpool;
+
+% ============================================================
+% 2x2 averaging parameter
+% ============================================================
+% Minimum number of valid pixels required inside each 2x2 box.
+% Allowed values: 1, 2, 3, or 4.
+%
+% Example:
+%   1 -> at least 1 of 4 pixels must be valid
+%   2 -> at least 2 of 4 pixels must be valid
+%   3 -> at least 3 of 4 pixels must be valid
+%   4 -> all 4 pixels must be valid
+%
+minValidPixelsPerBox = 2;
+
+if ~ismember(minValidPixelsPerBox, 1:4)
+    error('minValidPixelsPerBox must be an integer between 1 and 4.');
+end
+
+
+% Each uncommented row is processed.
+% Comment out any complete row that you do not want to run.
+% Columns: case label, input MAT file, BSC variable, output MAT file
+cases = {
+    'JC',   'data/bscdataJCCP.mat',   'bscdataJCCP',   'data2x2/sfm2_bsc_params_JCCP.mat';
+    'LMTK', 'data/bscdataLMTKCP.mat', 'bscdataLMTKCP', 'data2x2/sfm2_bsc_params_LMTKCP.mat';
+    '4T1',  'data/bscdata4T1CP.mat',  'bscdata4T1CP',  'data2x2/sfm2_bsc_params_4T1CP.mat';
+};
+
+totalTimer = tic;
+
+for caseIdx = 1:size(cases, 1)
+    caseTimer = tic;
+
+    caseName   = cases{caseIdx, 1};
+    inputFile  = cases{caseIdx, 2};
+    dataVar    = cases{caseIdx, 3};
+    outputFile = cases{caseIdx, 4};
+
+    fprintf('\n%s\n', repmat('=', 1, 70));
+    fprintf('CASE %d/%d: %s\n', caseIdx, size(cases, 1), caseName);
+    fprintf('Input : %s\n', inputFile);
+    fprintf('Output: %s\n', outputFile);
+    fprintf('%s\n', repmat('=', 1, 70));
+
+    loadedData = load(inputFile);
+    bscdata = loadedData.(dataVar);
+    f = loadedData.f;
+
+    cpNames = fieldnames(bscdata);
+    params_all = struct();
+
+    for c = 1:numel(cpNames)
+        cpName = cpNames{c};
+        scanNames = fieldnames(bscdata.(cpName));
+
+        fprintf('\n  Sample %d/%d: %s (%d scans)\n', ...
+            c, numel(cpNames), cpName, numel(scanNames));
+
+        for s = 1:numel(scanNames)
+            scanTimer = tic;
+            scanName = scanNames{s};
+
+            % ========================================================
+            % Original BSC block: n x m x 128
+            % ========================================================
+            bscblock_original = bscdata.(cpName).(scanName);
+
+            if isempty(bscblock_original)
+                fprintf('    [%2d/%2d] %-20s SKIPPED — empty block\n', ...
+                    s, numel(scanNames), scanName);
+                continue;
+            end
+
+
+            % ========================================================
+            % ORIGINAL VALID MASK
+            %
+            % Pixel is valid when at least one BSC value is non-zero.
+            % Size: n x m
+            % ========================================================
+            validMask_original = any(bscblock_original ~= 0, 3);
+
+            [n, m, nFreq] = size(bscblock_original);
+
+
+            % ========================================================
+            % NON-OVERLAPPING 2x2 REDUCTION
+            %
+            % Edge boxes are NOT discarded:
+            %
+            % Normal interior box: 2 x 2
+            % Odd final row:       1 x 2
+            % Odd final column:    2 x 1
+            % Odd row + column:    1 x 1
+            %
+            % Output dimensions:
+            %   n2 = ceil(n/2)
+            %   m2 = ceil(m/2)
+            % ========================================================
+            
+            n2 = ceil(n / 2);
+            m2 = ceil(m / 2);
+            
+            % Reduced BSC block
+            bscblock = zeros(n2, m2, nFreq, 'like', bscblock_original);
+            
+            % Reduced validity mask
+            validMask = false(n2, m2);
+            
+            % Number of valid original pixels contributing to each box
+            validCount = zeros(n2, m2, 'uint8');
+            
+            
+            for i = 1:n2
+            
+                % Normally two rows.
+                % For an odd n, the last box contains only the final row.
+                r1 = 2*i - 1;
+                r2 = min(2*i, n);
+                rr = r1:r2;
+            
+                for j = 1:m2
+            
+                    % Normally two columns.
+                    % For an odd m, the last box contains only the final column.
+                    c1 = 2*j - 1;
+                    c2 = min(2*j, m);
+                    cc = c1:c2;
+            
+                    % ------------------------------------------------
+                    % Extract validity mask for this spatial box
+                    %
+                    % Possible dimensions:
+                    %   2x2
+                    %   2x1
+                    %   1x2
+                    %   1x1
+                    % ------------------------------------------------
+                    boxMask = validMask_original(rr, cc);
+            
+                    nBoxValid = nnz(boxMask);
+                    validCount(i, j) = nBoxValid;
+            
+                    % ------------------------------------------------
+                    % Box is valid only if it contains at least
+                    % minValidPixelsPerBox valid pixels
+                    % ------------------------------------------------
+                    if nBoxValid >= minValidPixelsPerBox
+            
+                        validMask(i, j) = true;
+            
+                        % Number of spatial pixels actually present
+                        % in this box: 1, 2, or 4
+                        nPixelsInBox = numel(boxMask);
+            
+                        % Extract BSC data
+                        %
+                        % Convert:
+                        %   rows x cols x 128
+                        %
+                        % into:
+                        %   nPixelsInBox x 128
+                        %
+                        boxData = reshape( ...
+                            bscblock_original(rr, cc, :), ...
+                            nPixelsInBox, nFreq);
+            
+                        % Keep only valid spatial pixels
+                        validBoxData = boxData(boxMask(:), :);
+            
+                        % Average only valid pixels
+                        meanBSC = mean(validBoxData, 1);
+            
+                        % Store averaged BSC
+                        bscblock(i, j, :) = reshape(meanBSC, 1, 1, nFreq);
+                    end
+                end
+            end
+
+
+            % ========================================================
+            % At this point:
+            %
+            % size(bscblock)
+            %       = n2 x m2 x 128
+            %
+            % size(validMask)
+            %       = n2 x m2
+            %
+            % validCount(i,j)
+            %       = number of valid pixels in original 2x2 box
+            % ========================================================
+
+            [rows, cols] = find(validMask);
+            nValid = numel(rows);
+
+            fprintf( ...
+                '    [%2d/%2d] %-20s %7d valid 2x2 boxes (%dx%d -> %dx%d) ... ', ...
+                s, numel(scanNames), scanName, ...
+                nValid, n, m, n2, m2);
+
+
+            if nValid == 0
+                fprintf('SKIPPED — no valid boxes\n');
+                continue;
+            end
+
+
+            % ========================================================
+            % SFM inversion on REDUCED BSC data
+            % ========================================================
+
+            % Result now has spatial size n2 x m2
+            params_block = nan(n2, m2, 11);
+
+            params_valid = nan(nValid, 11);
+
+
+            parfor k = 1:nValid
+
+                x = rows(k);
+                y = cols(k);
+
+                % Averaged 128-point BSC vector
+                bsc_vector = squeeze(bscblock(x, y, :));
+
+                params_valid(k, :) = sfm2_inversion_BSC_SFM_Neldermead_sansLog_Fc(f, bsc_vector, 20);
+            end
+
+
+            % Put inversion results back into the spatial matrix
+            for k = 1:nValid
+                params_block(rows(k), cols(k), :) = ...
+                    params_valid(k, :);
+            end
+
+
+            params_all.(cpName).(scanName) = params_block;
+
+            fprintf('DONE in %.1f s\n', toc(scanTimer));
+        end
+    end
+
+
+    save(outputFile, 'params_all', 'f', '-v7.3');
+
+    fprintf('\nCompleted %s in %.1f min\n', ...
+        caseName, toc(caseTimer) / 60);
+end
+
+
+fprintf('\nAll selected cases completed in %.1f min.\n', ...
+    toc(totalTimer) / 60);
