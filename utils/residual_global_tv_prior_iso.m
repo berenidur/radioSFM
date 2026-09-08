@@ -113,7 +113,7 @@ function r = residual_global_tv_prior_iso(x, params_init, channels, ...
     
                 % LS residual
                 edge_count = edge_count + 1;
-                r_edges(edge_count) = sqrt(lambda(c)) * grad_mag^(1/4);
+                r_edges(edge_count) = sqrt(lambda(c)) * sqrt(grad_mag);
             end
         end
     
