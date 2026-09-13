@@ -336,7 +336,7 @@ for caseIdx = 1:size(cases, 1)
             params_valid = nan(nValid, 11);
 
 
-            for k = 1:nValid
+            parfor k = 1:nValid
 
                 x = rows(k);
                 y = cols(k);
