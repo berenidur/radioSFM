@@ -16,6 +16,9 @@ addpath('utils/');
 minValidPixelsPerBox = 1;
 avgbox = '2x2';
 
+% alg = 'fminsearch';
+alg = 'fmincon';
+
 if ~ismember(minValidPixelsPerBox, 1:4)
     error('minValidPixelsPerBox must be an integer between 1 and 4.');
 end
@@ -42,7 +45,7 @@ cases = [ ...
     strcat('bscdata', cp(:)), ...
     strcat(['data',avgbox,'/minValidPixelsPerBox', ...
         num2str(minValidPixelsPerBox),'/sfm2_bsc_params_'], ...
-        cp(:), '.mat') ...
+        cp(:), ['_',alg,'.mat']) ...
 ];
 
 
@@ -333,7 +336,7 @@ for caseIdx = 1:size(cases, 1)
             params_valid = nan(nValid, 11);
 
 
-            parfor k = 1:nValid
+            for k = 1:nValid
 
                 x = rows(k);
                 y = cols(k);
@@ -343,8 +346,8 @@ for caseIdx = 1:size(cases, 1)
                     bscblock(x, y, :));
 
                 params_valid(k, :) = ...
-                    sfm2_inversion_BSC_SFM_Neldermead_sansLog_Fc( ...
-                    f, bsc_vector, 20);
+                    sfm2_inversion_BSC( ...
+                    f, bsc_vector, 20, alg);
             end
 
 

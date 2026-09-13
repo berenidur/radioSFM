@@ -7,7 +7,10 @@
 % x(6)=contraste d'impedance gammaZ     gammaz2
 % x(7)=n to c scattering ratio          w
 
-function [xminbest_min,a,exitflag_min]=sfm2_F_InversionSFMTroisParam_NelderMead_Fc(connu,nb_xini)
+function [xminbest_min,a,exitflag_min]=sfm2_F_InversionSFMTroisParam(connu,nb_xini,alg)
+% alg:
+%   'fminsearch':   Nelder Mead
+%   'fmincon'   :   Trust Region Reflective
 
 % a_ini=(rand(1,nb_xini)*9+4).*1e-6;  étude CP/T inversion param pertinents
 % phi_ini=(rand(1,nb_xini)*0.7);
@@ -54,7 +57,20 @@ w_ini = [0.105263157894737 0.315789473684211 0 0.789473684210526 1 0.73684210526
 % phi_ini=[0.518421052631579,0.445789473684211,0.482105263157895,0.0100000000000000,0.409473684210526,0.627368421052632,0.554736842105263,0.591052631578947,0.118947368421053,0.336842105263158,0.264210526315790,0.191578947368421,0.700000000000000,0.155263157894737,0.0826315789473684,0.227894736842105,0.300526315789474,0.663684210526316,0.0463157894736842,0.373157894736842];
 % gammaZ_ini=[0.150000000000000,0.0480526315789474,0.0323684210526316,0.126473684210526,0.0245263157894737,0.142157894736842,0.118631578947368,0.0872631578947369,0.0794210526315790,0.110789473684211,0.0558947368421053,0.0637368421052632,0.134315789473684,0.0951052631578947,0.0402105263157895,0.102947368421053,0.00100000000000000,0.0715789473684211,0.00884210526315789,0.0166842105263158];
 
-options = optimset('Display','off','MaxIter',1000,'MaxFunEvals',1000,'TolX',1e-100);
+% fmincon constraints
+lb = [3e-6,   0.05, 0,   5.5e-6, 0.4, 0,   0];
+ub = [6.5e-6, 0.30, 0.5, 10e-6,  0.8, 0.5, 1];
+
+% fminsearch opt
+options_fminsearch = optimset('Display','off','MaxIter',1000,'MaxFunEvals',1000,'TolX',1e-100);
+
+% fmincon opt
+options_fmincon = optimoptions('fmincon', ...
+    'Display','off', ...
+    'Algorithm','sqp', ...
+    'MaxIterations',1000, ...
+    'MaxFunctionEvaluations',1000, ...
+    'StepTolerance',1e-100);
 
 for ii=1:length(a_ini1)
     % xinit=[1e-6 0.2 0.05];
@@ -63,11 +79,26 @@ for ii=1:length(a_ini1)
         a_ini2(ii), phi_ini2(ii), gammaZ_ini2(ii), ...
         w_ini(ii),
         ];
-    [xmin,fvalmin,exitflag]=fminsearch(@(x) sfm2_F_myfun_SFMTroisParam(x,connu),xinit,options);
-    % res=[xmin(1).*1e6 xmin(2) xmin(3)]
-    if xmin(3)<0 || xmin(6)<0
-       fvalmin=50;
+    
+    if strcmp(alg,'fminsearch')
+        [xmin,fvalmin,exitflag]=fminsearch(@(x) sfm2_F_myfun_SFMTroisParam(x,connu),xinit,options_fminsearch);
+        % res=[xmin(1).*1e6 xmin(2) xmin(3)]
+        if xmin(3)<0 || xmin(6)<0
+           fvalmin=50;
+        end
+
+    elseif strcmp(alg,'fmincon')
+        [xmin,fvalmin,exitflag] = fmincon( ...
+            @(x) sfm2_F_myfun_SFMTroisParam(x,connu), ...
+            xinit, ...
+            [],[],[],[], ...     % no linear constraints
+            lb,ub, ...           % bounds
+            [], ...              % no nonlinear constraints
+            options_fmincon);
+    else
+        error('Select an algorithm')
     end
+    
     xminbest(:,ii)=xmin;
     fvalminbest(ii)=fvalmin;
     exitflagbest(ii)=exitflag;
@@ -92,162 +123,5 @@ exitflag_min=exitflagbest(b);
 %%%%%%%%%%%%%%
 
 
-% xinit=[1e-6 0.6 0.05];
-% [xmin,fvalmin,exitflag]=fminsearch(@(x) F_myfun_SFMTroisParam(x,connu),xinit,options);
-% if xmin(3)<0
-%    fvalmin=50;
-% end
-% if fvalmin<fvalminbest
-%     xminbest=xmin;
-%     fvalminbest=fvalmin;
-% end
-% 
-% xinit=[1e-6 0.2 0.05];
-% [xmin,fvalmin,exitflag]=fminsearch(@(x) F_myfun_SFMTroisParam(x,connu),xinit,options);
-% if xmin(3)<0
-%    fvalmin=50;
-% end
-% if fvalmin<fvalminbest
-%     xminbest=xmin;
-%     fvalminbest=fvalmin;
-% end
-% 
-% xinit=[1e-6 0.6 0.1];
-% [xmin,fvalmin,exitflag]=fminsearch(@(x) F_myfun_SFMTroisParam(x,connu),xinit,options);
-% if xmin(3)<0
-%    fvalmin=50;
-% end
-% if fvalmin<fvalminbest
-%     xminbest=xmin;
-%     fvalminbest=fvalmin;
-% end
-% 
-% 
-% xinit=[5e-6 0.2 0.05];
-% [xmin,fvalmin,exitflag]=fminsearch(@(x) F_myfun_SFMTroisParam(x,connu),xinit,options);
-% if xmin(3)<0
-%    fvalmin=50;
-% end
-% if fvalmin<fvalminbest
-%     xminbest=xmin;
-%     fvalminbest=fvalmin;
-% end
-% 
-% 
-% xinit=[5e-6 0.6 0.05];
-% [xmin,fvalmin,exitflag]=fminsearch(@(x) F_myfun_SFMTroisParam(x,connu),xinit,options);
-% if xmin(3)<0
-%    fvalmin=50;
-% end
-% if fvalmin<fvalminbest
-%     xminbest=xmin;
-%     fvalminbest=fvalmin;
-% end
-% 
-% xinit=[5e-6 0.2 0.05];
-% [xmin,fvalmin,exitflag]=fminsearch(@(x) F_myfun_SFMTroisParam(x,connu),xinit,options);
-% if xmin(3)<0
-%    fvalmin=50;
-% end
-% if fvalmin<fvalminbest
-%     xminbest=xmin;
-%     fvalminbest=fvalmin;
-% end
-% 
-% xinit=[5e-6 0.6 0.1];
-% [xmin,fvalmin,exitflag]=fminsearch(@(x) F_myfun_SFMTroisParam(x,connu),xinit,options);
-% if xmin(3)<0
-%    fvalmin=50;
-% end
-% if fvalmin<fvalminbest
-%     xminbest=xmin;
-%     fvalminbest=fvalmin;
-% end
-% 
-% 
-% xinit=[8e-6 0.2 0.05];
-% [xmin,fvalmin,exitflag]=fminsearch(@(x) F_myfun_SFMTroisParam(x,connu),xinit,options);
-% if xmin(3)<0
-%    fvalmin=50;
-% end
-% if fvalmin<fvalminbest
-%     xminbest=xmin;
-%     fvalminbest=fvalmin;
-% end
-% 
-% 
-% xinit=[8e-6 0.6 0.05];
-% [xmin,fvalmin,exitflag]=fminsearch(@(x) F_myfun_SFMTroisParam(x,connu),xinit,options);
-% if xmin(3)<0
-%    fvalmin=50;
-% end
-% if fvalmin<fvalminbest
-%     xminbest=xmin;
-%     fvalminbest=fvalmin;
-% end
-% 
-% xinit=[8e-6 0.2 0.05];
-% [xmin,fvalmin,exitflag]=fminsearch(@(x) F_myfun_SFMTroisParam(x,connu),xinit,options);
-% if xmin(3)<0
-%    fvalmin=50;
-% end
-% if fvalmin<fvalminbest
-%     xminbest=xmin;
-%     fvalminbest=fvalmin;
-% end
-% 
-% xinit=[8e-6 0.6 0.1];
-% [xmin,fvalmin,exitflag]=fminsearch(@(x) F_myfun_SFMTroisParam(x,connu),xinit,options);
-% if xmin(3)<0
-%    fvalmin=50;
-% end
-% if fvalmin<fvalminbest
-%     xminbest=xmin;
-%     fvalminbest=fvalmin;
-% end
-% 
-% 
-% xinit=[10e-6 0.2 0.05];
-% [xmin,fvalmin,exitflag]=fminsearch(@(x) F_myfun_SFMTroisParam(x,connu),xinit,options);
-% if xmin(3)<0
-%    fvalmin=50;
-% end
-% if fvalmin<fvalminbest
-%     xminbest=xmin;
-%     fvalminbest=fvalmin;
-% end
-% 
-% 
-% xinit=[10e-6 0.6 0.05];
-% [xmin,fvalmin,exitflag]=fminsearch(@(x) F_myfun_SFMTroisParam(x,connu),xinit,options);
-% if xmin(3)<0
-%    fvalmin=50;
-% end
-% if fvalmin<fvalminbest
-%     xminbest=xmin;
-%     fvalminbest=fvalmin;
-% end
-% 
-% xinit=[10e-6 0.2 0.05];
-% [xmin,fvalmin,exitflag]=fminsearch(@(x) F_myfun_SFMTroisParam(x,connu),xinit,options);
-% if xmin(3)<0
-%    fvalmin=50;
-% end
-% if fvalmin<fvalminbest
-%     xminbest=xmin;
-%     fvalminbest=fvalmin;
-% end
-% 
-% xinit=[10e-6 0.6 0.1];
-% [xmin,fvalmin,exitflag]=fminsearch(@(x) F_myfun_SFMTroisParam(x,connu),xinit,options);
-% if xmin(3)<0
-%    fvalmin=50;
-% end
-% if fvalmin<fvalminbest
-%     xminbest=xmin;
-%     fvalminbest=fvalmin;
-% end
-% 
-% xminbest(4)=fvalminbest;
 
 end
