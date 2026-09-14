@@ -2,6 +2,7 @@
 theme.m
 preprocessing/
 slurm/
+resultados_finales_CPS/
 
 # Created by https://www.toptal.com/developers/gitignore/api/matlab
 # Edit at https://www.toptal.com/developers/gitignore?templates=matlab
