@@ -19,6 +19,8 @@ avgbox = '2x2';
 % alg = 'fminsearch';
 alg = 'fmincon';
 
+saveavgdata = false; % SAVE REDUCED / AVERAGED BSC DATA
+
 if ~ismember(minValidPixelsPerBox, 1:4)
     error('minValidPixelsPerBox must be an integer between 1 and 4.');
 end
@@ -412,26 +414,30 @@ for caseIdx = 1:size(cases, 1)
     % expects the original variable naming convention.
     % ========================================================
 
-    bscSaveStruct = struct();
-
-    bscSaveStruct.(dataVar) = bscdata_avg;
-    bscSaveStruct.f = f;
-    bscSaveStruct.minValidPixelsPerBox = minValidPixelsPerBox;
-    bscSaveStruct.avgbox = avgbox;
-
-    save( ...
-        bscOutputFile, ...
-        '-struct', ...
-        'bscSaveStruct', ...
-        '-v7.3');
-
-
-    fprintf('  Saved averaged BSC file as:\n');
-    fprintf('    %s\n', bscOutputFile);
-
-
-    fprintf('\nCompleted %s in %.1f min\n', ...
-        caseName, toc(caseTimer) / 60);
+    if saveavgdata
+        bscSaveStruct = struct();
+    
+        bscSaveStruct.(dataVar) = bscdata_avg;
+        bscSaveStruct.f = f;
+        bscSaveStruct.minValidPixelsPerBox = minValidPixelsPerBox;
+        bscSaveStruct.avgbox = avgbox;
+    
+        save( ...
+            bscOutputFile, ...
+            '-struct', ...
+            'bscSaveStruct', ...
+            '-v7.3');
+    
+    
+        fprintf('  Saved averaged BSC file as:\n');
+        fprintf('    %s\n', bscOutputFile);
+    
+    
+        fprintf('\nCompleted %s in %.1f min\n', ...
+            caseName, toc(caseTimer) / 60);
+    else
+        fprintf('  Averaged BSC data was not saved\n');
+    end
 
 end
 
