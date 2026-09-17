@@ -19,6 +19,26 @@ avgbox = '2x2';
 % cfg.alg = 'fminsearch';
 cfg.alg = 'fmincon';
 
+% constraints for fmincon
+% constraint phi
+cfg.fname = '_PHIbound';
+cfg.lb = [0,      0.05, 0,   0,      0.4, 0,   0];
+cfg.ub = [15e-6,  0.30, 0.5, 15e-6,  0.8, 0.5, 1];
+
+% constraint radius
+cfg.fname = '_Abound';
+cfg.lb = [3e-6,   0,    0,   5.5e-6, 0,   0,   0];
+cfg.ub = [6.5e-6, 1,    0.5, 10e-6,  1,   0.5, 1];
+
+% constraint radius dr
+cfg.fname = '_dAbound';
+cfg.lb = [3e-6,   0,    0,   0.01e-6,0,   0,   0];
+cfg.ub = [6.5e-6, 1,    0.5, 7e-6,   1,   0.5, 1];
+
+% % all constraints
+% cfg.lb = [3e-6,   0.05, 0,   5.5e-6, 0.4, 0,   0];
+% cfg.ub = [6.5e-6, 0.30, 0.5, 10e-6,  0.8, 0.5, 1];
+
 saveavgdata = false; % SAVE REDUCED / AVERAGED BSC DATA
 
 if ~ismember(minValidPixelsPerBox, 1:4)
@@ -47,7 +67,7 @@ cases = [ ...
     strcat('bscdata', cp(:)), ...
     strcat(['data',avgbox,'/minValidPixelsPerBox', ...
         num2str(minValidPixelsPerBox),'/sfm2_bsc_params_'], ...
-        cp(:), ['_',cfg.alg,'.mat']) ...
+        cp(:), ['_',cfg.alg,cfg.fname,'.mat']) ...
 ];
 
 

@@ -58,8 +58,24 @@ w_ini = [0.105263157894737 0.315789473684211 0 0.789473684210526 1 0.73684210526
 % gammaZ_ini=[0.150000000000000,0.0480526315789474,0.0323684210526316,0.126473684210526,0.0245263157894737,0.142157894736842,0.118631578947368,0.0872631578947369,0.0794210526315790,0.110789473684211,0.0558947368421053,0.0637368421052632,0.134315789473684,0.0951052631578947,0.0402105263157895,0.102947368421053,0.00100000000000000,0.0715789473684211,0.00884210526315789,0.0166842105263158];
 
 % fmincon constraints
-lb = [3e-6,   0.05, 0,   5.5e-6, 0.4, 0,   0];
-ub = [6.5e-6, 0.30, 0.5, 10e-6,  0.8, 0.5, 1];
+has_lb = isfield(cfg, 'lb') && ~isempty(cfg.lb); 
+has_ub = isfield(cfg, 'ub') && ~isempty(cfg.ub);
+
+if strcmp(cfg.alg, 'fminsearch')
+    if has_lb || has_ub
+        warning('cfg.lb and/or cfg.ub are set, but fminsearch does not use bounds.');
+    end
+else
+    if xor(has_lb, has_ub)
+        error('cfg.lb and cfg.ub must either both be set or both be omitted.');
+    elseif ~has_lb && ~has_ub
+        lb = [3e-6,   0.05, 0,   5.5e-6, 0.4, 0,   0];
+        ub = [6.5e-6, 0.30, 0.5, 10e-6,  0.8, 0.5, 1];
+    else
+        lb = cfg.lb;
+        ub = cfg.ub;
+    end
+end
 
 % fminsearch opt
 options_fminsearch = optimset('Display','off','MaxIter',1000,'MaxFunEvals',1000,'TolX',1e-100);
