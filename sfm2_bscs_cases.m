@@ -73,7 +73,7 @@ for caseIdx = 1:size(cases, 1)
 
                 bsc_vector = squeeze(bscblock(x, y, :));
 
-                params_valid(k, :) = sfm2_inversion_BSC(f, bsc_vector, 20, cfg.alg);
+                params_valid(k, :) = sfm2_inversion_BSC(f, bsc_vector, 20, cfg);
             end
 
             for k = 1:nValid

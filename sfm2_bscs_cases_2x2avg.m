@@ -369,7 +369,7 @@ for caseIdx = 1:size(cases, 1)
 
                 params_valid(k, :) = ...
                     sfm2_inversion_BSC( ...
-                    f, bsc_vector, 20, cfg.alg);
+                    f, bsc_vector, 20, cfg);
             end
 
 
