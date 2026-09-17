@@ -7,8 +7,8 @@
 % x(6)=contraste d'impedance gammaZ     gammaz2
 % x(7)=n to c scattering ratio          w
 
-function [xminbest_min,a,exitflag_min]=sfm2_F_InversionSFMTroisParam(connu,nb_xini,alg)
-% alg:
+function [xminbest_min,a,exitflag_min]=sfm2_F_InversionSFMTroisParam(connu,nb_xini,cfg)
+% cfg.alg:
 %   'fminsearch':   Nelder Mead
 %   'fmincon'   :   Trust Region Reflective
 
@@ -81,14 +81,14 @@ for ii=1:length(a_ini1)
         w_ini(ii),
         ];
     
-    if strcmp(alg,'fminsearch')
+    if strcmp(cfg.alg,'fminsearch')
         [xmin,fvalmin,exitflag]=fminsearch(@(x) sfm2_F_myfun_SFMTroisParam(x,connu),xinit,options_fminsearch);
         % res=[xmin(1).*1e6 xmin(2) xmin(3)]
         if xmin(3)<0 || xmin(6)<0
            fvalmin=50;
         end
 
-    elseif strcmp(alg,'fmincon')
+    elseif strcmp(cfg.alg,'fmincon')
         [xmin,fvalmin,exitflag] = fmincon( ...
             @(x) sfm2_F_myfun_SFMTroisParam_trr(x,connu), ...
             xinit, ...

@@ -1,4 +1,4 @@
-function[Params]=sfm2_inversion_BSC(freq,data,nb_xini,alg)
+function[Params]=sfm2_inversion_BSC(freq,data,nb_xini,cfg)
 
 % data=load('bsc_freq.mat');
 
@@ -14,7 +14,7 @@ connu=[BSC kk];
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
 
-[x,fvalmin,exitflag]=sfm2_F_InversionSFMTroisParam(connu,nb_xini,alg);
+[x,fvalmin,exitflag]=sfm2_F_InversionSFMTroisParam(connu,nb_xini,cfg);
 
 Vs=(4/3)*pi*(x(1))^3;
 % CdB=10*log10((x(3)^2*x(2)/Vs)*(1e-3)^3); % is complex in a few cases

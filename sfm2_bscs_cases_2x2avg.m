@@ -16,8 +16,8 @@ addpath('utils/');
 minValidPixelsPerBox = 1;
 avgbox = '2x2';
 
-% alg = 'fminsearch';
-alg = 'fmincon';
+% cfg.alg = 'fminsearch';
+cfg.alg = 'fmincon';
 
 saveavgdata = false; % SAVE REDUCED / AVERAGED BSC DATA
 
@@ -47,7 +47,7 @@ cases = [ ...
     strcat('bscdata', cp(:)), ...
     strcat(['data',avgbox,'/minValidPixelsPerBox', ...
         num2str(minValidPixelsPerBox),'/sfm2_bsc_params_'], ...
-        cp(:), ['_',alg,'.mat']) ...
+        cp(:), ['_',cfg.alg,'.mat']) ...
 ];
 
 
@@ -349,7 +349,7 @@ for caseIdx = 1:size(cases, 1)
 
                 params_valid(k, :) = ...
                     sfm2_inversion_BSC( ...
-                    f, bsc_vector, 20, alg);
+                    f, bsc_vector, 20, cfg.alg);
             end
 
 

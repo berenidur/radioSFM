@@ -1,16 +1,16 @@
 clear; clc;
 addpath('utils/');
 
-alg = 'fminsearch';
-% alg = 'fmincon';
+cfg.alg = 'fminsearch';
+% cfg.alg = 'fmincon';
 
 % Each uncommented row is processed.
 % Comment out any complete row that you do not want to run.
 % Columns: case label, input MAT file, BSC variable, output MAT file
 cases = {
-    'JC',   'data/bscdataJCCP.mat',   'bscdataJCCP',   ['data/sfm2_bsc_params_JCCP_',alg,'.mat'];
-    'LMTK', 'data/bscdataLMTKCP.mat', 'bscdataLMTKCP', ['data/sfm2_bsc_params_LMTKCP_',alg,'.mat'];
-    '4T1',  'data/bscdata4T1CP.mat',  'bscdata4T1CP',  ['data/sfm2_bsc_params_4T1CP_',alg,'.mat'];
+    'JC',   'data/bscdataJCCP.mat',   'bscdataJCCP',   ['data/sfm2_bsc_params_JCCP_',cfg.alg,'.mat'];
+    'LMTK', 'data/bscdataLMTKCP.mat', 'bscdataLMTKCP', ['data/sfm2_bsc_params_LMTKCP_',cfg.alg,'.mat'];
+    '4T1',  'data/bscdata4T1CP.mat',  'bscdata4T1CP',  ['data/sfm2_bsc_params_4T1CP_',cfg.alg,'.mat'];
 };
 
 totalTimer = tic;
@@ -73,7 +73,7 @@ for caseIdx = 1:size(cases, 1)
 
                 bsc_vector = squeeze(bscblock(x, y, :));
 
-                params_valid(k, :) = sfm2_inversion_BSC(f, bsc_vector, 20, alg);
+                params_valid(k, :) = sfm2_inversion_BSC(f, bsc_vector, 20, cfg.alg);
             end
 
             for k = 1:nValid
