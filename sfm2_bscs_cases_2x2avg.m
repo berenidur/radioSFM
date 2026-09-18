@@ -20,19 +20,19 @@ avgbox = '2x2';
 cfg.alg = 'fmincon';
 
 % constraints for fmincon
-% constraint phi
-cfg.fname = '_PHIbound';
-cfg.lb = [0,      0.05, 0,   0,      0.4, 0,   0];
-cfg.ub = [15e-6,  0.30, 0.5, 15e-6,  0.8, 0.5, 1];
-
-% constraint radius
-cfg.fname = '_Abound';
-cfg.lb = [3e-6,   0,    0,   5.5e-6, 0,   0,   0];
-cfg.ub = [6.5e-6, 1,    0.5, 10e-6,  1,   0.5, 1];
+% % constraint phi
+% cfg.fname = '_PHIbound';
+% cfg.lb = [0,      0.05, 0,   0,      0.4, 0,   0];
+% cfg.ub = [15e-6,  0.30, 0.5, 15e-6,  0.8, 0.5, 1];
+% 
+% % constraint radius
+% cfg.fname = '_Abound';
+% cfg.lb = [3e-6,   0,    0,   5.5e-6, 0,   0,   0];
+% cfg.ub = [6.5e-6, 1,    0.5, 10e-6,  1,   0.5, 1];
 
 % constraint radius dr
 cfg.fname = '_dAbound';
-cfg.lb = [3e-6,   0,    0,   0.01e-6,0,   0,   0];
+cfg.lb = [3e-6,   0,    0,   0,      0,   0,   0];
 cfg.ub = [6.5e-6, 1,    0.5, 7e-6,   1,   0.5, 1];
 
 % % all constraints
@@ -55,8 +55,8 @@ end
 %   parameter output MAT file
 names = {
     'JC',...
-    'LMTK',...
-    '4T1',...
+    % 'LMTK',...
+    % '4T1',...
     };
 
 cp = strcat(names,'CP');

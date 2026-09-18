@@ -104,6 +104,26 @@ for ii=1:length(a_ini1)
            fvalmin=50;
         end
 
+    elseif strcmp(cfg.alg,'fmincon') && isfield(cfg,'fname') && strcmp(cfg.fname,'_dAbound')
+        % Optimization variables:
+        % z = [a_N, phi_N, gammaZ_N, a_C-a_N, phi_C, gammaZ_C, w]
+        zinit = [
+            a_ini1(ii), phi_ini1(ii), gammaZ_ini1(ii), ...
+            a_ini2(ii) - a_ini1(ii), ...   % delta_a = a_C - a_N
+            phi_ini2(ii), gammaZ_ini2(ii), ...
+            w_ini(ii)
+        ];
+        [zmin,fvalmin,exitflag] = fmincon( ...
+            @(z) sfm2_F_myfun_SFMTroisParam_trr_dr(z,connu), ...
+            zinit, ...
+            [],[],[],[], ...     % no linear constraints
+            lb,ub, ...           % bounds
+            [], ...              % no nonlinear constraints
+            options_fmincon);
+        % Convert optimizer variables back to physical SFM2 parameters
+        xmin = zmin;
+        xmin(4) = zmin(1) + zmin(4);   % a_C = a_N + delta_a
+
     elseif strcmp(cfg.alg,'fmincon')
         [xmin,fvalmin,exitflag] = fmincon( ...
             @(x) sfm2_F_myfun_SFMTroisParam_trr(x,connu), ...
